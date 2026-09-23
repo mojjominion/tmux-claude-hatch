@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Interactive picker for running Claude agents.
+# Interactive picker for running coding agents.
 #
 #   picker.sh           fzf picker; on enter, jumps to the chosen agent.
 #   picker.sh --list    print the rows and refresh the cache (used by fzf's
@@ -33,7 +33,7 @@ if [ "${1:-}" = '--copy' ]; then
   exit 0
 fi
 
-for tool in fzf jq "$(get_tmux_option @claude_command 'claude')"; do
+for tool in fzf jq; do
   command -v "$tool" >/dev/null 2>&1 || {
     tmux display-message "tmux-claude-hatch: $tool is required for the picker"
     exit 0
@@ -66,7 +66,7 @@ fzf --track --version >/dev/null 2>&1 && sync_opts+=(--track)
 # ctrl-y copies the agent's location (session:window.pane, e.g. claude-88074b0e:0.0)
 # and closes the picker.
 sel=$("${list_cmd[@]}" | fzf --ansi --delimiter='\t' --with-nth=5,6,7,8 \
-  --reverse --cycle --header='Claude agents · enter: jump · ctrl-x: kill · ctrl-y: copy' \
+  --reverse --cycle --header='Agents · enter: jump · ctrl-x: kill · ctrl-y: copy' \
   --preview='tmux capture-pane -ept {2}' --preview-window='up,70%,follow' \
   --bind="ctrl-x:execute-silent(kill {3})+reload(sleep 0.3; $self --list)" \
   --bind="ctrl-y:execute-silent($self --copy {7})+abort" \

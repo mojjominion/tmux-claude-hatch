@@ -23,8 +23,6 @@ Simple by design: it's just a few shell scripts.
     agent sessions
 - **Who it's not for**
   - People whose focus is the agent's chat interface rather than the code
-  - People who want one tool for sessions across several AI providers — this one
-    is Claude Code only
   - People who run a swarm of agents and don't read or write code themselves
 
 ## Features
@@ -132,7 +130,15 @@ set -g @claude_popup_width     '90%'     # popup width
 set -g @claude_popup_height    '90%'     # popup height
 set -g @claude_fzf_options    ''         # extra options passed to the fzf picker
 set -g @claude_forward_bell   'on'       # highlight the origin window on a bell
+set -g @claude_agents 'omp codex opencode gemini aider amp crush goose'
+                                         # other agents the picker finds by process name
 ```
+
+Claude Code gets exact `waiting` / `idle` / `working` from `claude agents --json`.
+Any agent in `@claude_agents` is found by its process name on a pane's terminal,
+and shows `working` if its pane printed in the last 5 seconds, `idle` otherwise.
+To launch a different agent with `prefix` + `y`, set `@claude_command`, e.g.
+`set -g @claude_command 'omp'`.
 
 For example, to skip permission prompts in launched sessions:
 
