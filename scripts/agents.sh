@@ -11,7 +11,7 @@
 # Identity is the agent process, joined pid -> tty -> pane, so several agents in
 # one project (same cwd, same session, different windows) each get a row.
 #
-#   Row: rank \t pane_id \t pid \t kind \t icon \t age \t loc \t path
+#   Row: rank \t pane_id \t pid \t kind \t agent+icon \t age \t loc \t path
 #   rank/pane_id/pid/kind are hidden from the display via fzf's --with-nth.
 set -uo pipefail
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -45,13 +45,13 @@ done)"
   -v names="$(get_tmux_option @claude_agents 'omp codex opencode gemini aider amp crush goose')" '
   BEGIN { split(names, nl, " "); for (i in nl) wanted[nl[i]] = 1 }
   function tilde(p) { return index(p, home) == 1 ? "~" substr(p, length(home) + 1) : p }
-  function emit(rank, tty, pid, icon, age, path) {
+  function emit(rank, tty, pid, icon, age, path, name) {
     claimed[tty] = 1
     kind = (index(sess[tty], prefix) == 1) ? "dedicated" : "loose"
     printf "%s\t%s\t%s\t%s\t%s\t%5s\t%s\t%s\n",
-      rank, pane[tty], pid, kind, icon, age, loc[tty], tilde(path)
+      rank, pane[tty], pid, kind, sprintf("%-8s %s", name, icon), age, loc[tty], tilde(path)
   }
-  $1 == "P" { tty_of[$2] = $3; if ($4 in wanted) { gen_pid[++ng] = $2 } next }
+  $1 == "P" { tty_of[$2] = $3; if ($4 in wanted) { gen_pid[++ng] = $2; gen_name[ng] = $4 } next }
   $1 == "T" { sub(/^\/dev\//, "", $2); pane[$2] = $3; sess[$2] = $4; loc[$2] = $5; cwd[$2] = $6; act[$2] = $7; next }
   $1 == "M" { seen_at[$2] = $3; next }
   $1 == "A" {
@@ -64,7 +64,7 @@ done)"
     else                      { icon = "\033[90m●\033[0m   ?    "; rank = 2 }  # grey   - unrecognised status
 
     age = (seen_at[$4] != "") ? int((now - seen_at[$4]) / 60) "m" : "-"
-    emit(rank, tty, $2, icon, age, $5)
+    emit(rank, tty, $2, icon, age, $5, "claude")
   }
   END {
     for (i = 1; i <= ng; i++) {
@@ -74,7 +74,7 @@ done)"
       quiet = now - act[tty]
       if (quiet < 5) { icon = "\033[31m●\033[0m working"; rank = 3 }
       else           { icon = "\033[32m●\033[0m idle   "; rank = 1 }
-      emit(rank, tty, gen_pid[i], icon, int(quiet / 60) "m", cwd[tty])
+      emit(rank, tty, gen_pid[i], icon, int(quiet / 60) "m", cwd[tty], gen_name[i])
     }
   }
 ' | sort -t$'\t' -k1,1n -k6,6n
