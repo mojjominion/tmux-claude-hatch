@@ -42,11 +42,13 @@ done)"
   [ -n "$claude_rows" ] && printf '%s\n' "$claude_rows" | sed $'s/^/A\t/'
 } | awk -F'\t' -v now="$(date +%s)" -v home="$HOME" \
   -v prefix="$(get_tmux_option @claude_session_prefix 'claude-')" \
+  -v stale="$(get_tmux_option @claude_stale_minutes '1440')" \
   -v names="$(get_tmux_option @claude_agents 'omp codex opencode gemini aider amp crush goose')" '
   BEGIN { split(names, nl, " "); for (i in nl) wanted[nl[i]] = 1 }
   function tilde(p) { return index(p, home) == 1 ? "~" substr(p, length(home) + 1) : p }
   function emit(rank, tty, pid, icon, age, path, name) {
     claimed[tty] = 1
+    if (stale > 0 && age != "-" && age + 0 > stale) return   # idle too long to count as active
     kind = (index(sess[tty], prefix) == 1) ? "dedicated" : "loose"
     printf "%s\t%s\t%s\t%s\t%s\t%5s\t%s\t%s\n",
       rank, pane[tty], pid, kind, sprintf("%-8s %s", name, icon), age, loc[tty], tilde(path)

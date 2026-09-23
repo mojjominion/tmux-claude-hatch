@@ -132,6 +132,7 @@ set -g @claude_fzf_options    ''         # extra options passed to the fzf picke
 set -g @claude_forward_bell   'on'       # highlight the origin window on a bell
 set -g @claude_agents 'omp codex opencode gemini aider amp crush goose'
                                          # other agents the picker finds by process name
+set -g @claude_stale_minutes '1440'     # hide agents idle longer than this; 0 shows all
 ```
 
 Claude Code gets exact `waiting` / `idle` / `working` from `claude agents --json`.
