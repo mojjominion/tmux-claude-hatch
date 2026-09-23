@@ -7,7 +7,7 @@
 #   picker.sh --copy <text>
 #                       copy <text> to the clipboard (used by ctrl-y).
 #
-# Rows come from agents.sh, which pairs each running Claude with the tmux pane it
+# Rows come from agents.sh, which pairs each running agent with the tmux pane it
 # occupies. Two kinds of row jump differently:
 #   dedicated  a Claude in a `claude-*` session this plugin launched — resumed in
 #              the popup, over the window it was launched from.
